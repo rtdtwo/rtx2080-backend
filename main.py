@@ -1,4 +1,5 @@
 from flask import Flask, jsonify
+import bl
 
 app = Flask(__name__, static_folder='static', static_url_path='')
 
@@ -6,6 +7,12 @@ app = Flask(__name__, static_folder='static', static_url_path='')
 @app.route('/heath_check')
 def health_check():
     return jsonify({'code': 200, 'msg': 'Server running!'}, 200)
+
+
+@app.route('/things')
+def get_things():
+    result = bl.get_things();
+    return jsonify(result, result['code'])
 
 
 if __name__ == '__main__':
