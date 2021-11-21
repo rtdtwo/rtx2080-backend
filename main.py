@@ -23,7 +23,7 @@ def get_things():
 
 
 @app.route('/things/<int:thing_id>/services')
-def get_things():
+def get_services():
     result = bl.get_things()
     return jsonify(result), result['code']
 
