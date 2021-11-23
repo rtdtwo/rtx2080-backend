@@ -28,7 +28,7 @@ def get_services(thing_id):
     return jsonify(result), result['code']
 
 @app.route('/relationships')
-def get_services():
+def get_relationships():
     result = bl.get_relationships()
     return jsonify(result), result['code']
 
