@@ -1,5 +1,5 @@
 from sqlobject import SQLObject
-from sqlobject.col import IntCol, StringCol
+from sqlobject.col import IntCol, JSONCol, StringCol
 from sqlobject.sqlite import builder
 
 connection = builder()('data.db')
@@ -18,7 +18,7 @@ class Service(SQLObject):
     def to_dict(self):
         return {
             'id': self.id,
-            'thing': get_thing(self.thing_id),
+            'thing': get_thing(self.thing_id).to_dict(),
             'name': self.name,
             'icon': self.icon,
             'desc': self.desc
@@ -59,6 +59,22 @@ def get_services_of_thing(thing_id):
     return list(Service.selectBy(thing_id=thing_id))
 
 
+def create_thing(**kwargs):
+    name = kwargs.get('name')
+    desc = kwargs.get('desc')
+    icon = kwargs.get('icon')
+
+    try:
+        Thing(
+            name=name,
+            desc=desc,
+            icon=icon
+        ).set()
+        return True
+    except:
+        return False
+
+
 def create_service(**kwargs):
     thing_id = kwargs.get('thing_id')
     name = kwargs.get('name')
@@ -67,10 +83,10 @@ def create_service(**kwargs):
 
     try:
         Service(
-            thing_id=thing_id,
             name=name,
             desc=desc,
-            icon=icon
+            icon=icon,
+            thing_id=thing_id
         ).set()
         return True
     except:
