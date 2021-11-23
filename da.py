@@ -4,7 +4,22 @@ from sqlobject.sqlite import builder
 
 connection = builder()('data.db')
 
-
+class Relationship(SQLObject):
+    class sqlmeta:
+        lazyUpdate = True
+    _connection = connection
+    name= StringCol()
+    desc= StringCol()
+    service_1 = IntCol()
+    service_2 = IntCol()
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'desc': self.desc,
+            'service1': get_service(self.service_1).to_dict(),
+            'service2': get_service(self.service_2).to_dict()
+        }
 class Service(SQLObject):
     class sqlmeta:
         lazyUpdate = True
@@ -42,6 +57,12 @@ class Thing(SQLObject):
             'desc': self.desc
         }
 
+def get_service(service_id):
+    services = list(Service.selectBy(id=service_id))
+    if len(services) > 0:
+        return services[0]
+    else:
+        return None
 
 def get_thing(thing_id):
     things = list(Thing.selectBy(id=thing_id))
@@ -50,6 +71,8 @@ def get_thing(thing_id):
     else:
         return None
 
+def get_all_relationships():
+    return list(Relationship.select())
 
 def get_all_things():
     return list(Thing.select())

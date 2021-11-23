@@ -14,6 +14,11 @@ def get_services(thing_id):
         'result': [service.to_dict() for service in da.get_services_of_thing(thing_id)]
     }
 
+def get_relationships():
+    return{
+        'code' : 200,
+        'result' : [relationship.to_dict() for relationship in da.get_all_relationships()]
+    }
 
 def create_thing(data):
     if 'name' not in data or 'desc' not in data:
