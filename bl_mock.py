@@ -20,7 +20,6 @@ def get_things():
                 'icon': '',
                 'desc': ''
             },
-
             {
                 'id': 4,
                 'name': 'Thing4',
