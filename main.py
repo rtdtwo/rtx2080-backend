@@ -27,6 +27,11 @@ def get_services(thing_id):
     result = bl.get_services(thing_id)
     return jsonify(result), result['code']
 
+@app.route('/relationships')
+def get_services():
+    result = bl.get_relationships()
+    return jsonify(result), result['code']
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=2080)

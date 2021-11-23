@@ -61,3 +61,4 @@ def get_services(thing_id):
             'desc': ''
         },]
     }
+
