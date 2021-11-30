@@ -24,7 +24,7 @@ def get_things():
     return jsonify(result), result['code']
 
 
-@app.route('/things/<int:thing_id>/services')
+@app.route('/things/<thing_id>/services')
 def get_services(thing_id):
     result = bl.get_services(thing_id)
     return jsonify(result), result['code']
@@ -40,20 +40,24 @@ def get_relationships():
 def create_thing():
     if not request.is_json:
         return jsonify({'code': 400, 'msg': 'No data provided'}), 400
-    
+
     data = request.json
     result = bl.create_thing(data)
     return jsonify(result), result['code']
 
 
-@app.route('/things/<int:thing_id>/services', methods=['POST'])
-def create_service(thing_id):
+@app.route('/services', methods=['POST'])
+def create_service():
     if not request.is_json:
         return jsonify({'code': 400, 'msg': 'No data provided'}), 400
-    
     data = request.json
-    data['thing_id'] = thing_id
     result = bl.create_service(data)
+    return jsonify(result), result['code']
+
+
+@app.route('/app/<app_id>/run', methods=['POST'])
+def run_app(app_id):
+    result = bl.run_app(app_id)
     return jsonify(result), result['code']
 
 
