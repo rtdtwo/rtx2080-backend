@@ -1,21 +1,19 @@
 import socket
-import struct
-import sys
+import json
 
-multicast_group = '224.1.1.1'
-server_address = ('127.0.0.1', 1235)
 
-# Create the socket
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+def execute_service(service, thing):
+    message = json.dumps({
+        "Tweet Type": "Service call",
+        "Service Name": service['name'],
+        "Thing ID": service['thing'],
+        "Entity ID": service['entity'],
+        "Space ID": service['space'],
+    })
 
-# Bind to the server address
-sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-sock.bind(server_address)
-
-group = socket.inet_aton(multicast_group)
-mreq = struct.pack('4sL', group, socket.INADDR_ANY)
-sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
-
-while True:
-    data, address = sock.recvfrom(1024)
-    print(data)
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((thing['ip'], 6668))
+    s.sendall(bytes(message, 'utf-8'))
+    data = s.recv(1024)
+    s.close()
+    return True, json.loads(data.decode())
