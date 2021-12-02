@@ -1,8 +1,6 @@
-import json
-import re
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import bl as bl
+import bl
 
 app = Flask(__name__, static_folder='static', static_url_path='')
 CORS(app)
@@ -21,6 +19,12 @@ def health_check():
 @app.route('/things')
 def get_things():
     result = bl.get_things()
+    return jsonify(result), result['code']
+
+
+@app.route('/services')
+def get_all_services():
+    result = bl.get_all_services()
     return jsonify(result), result['code']
 
 
@@ -55,9 +59,54 @@ def create_service():
     return jsonify(result), result['code']
 
 
-@app.route('/app/<app_id>/run', methods=['POST'])
-def run_app(app_id):
-    result = bl.run_app(app_id)
+@app.route('/relationships', methods=['POST'])
+def create_relationship():
+    if not request.is_json:
+        return jsonify({'code': 400, 'msg': 'No data provided'}), 400
+    data = request.json
+    result = bl.create_relationship(data)
+    return jsonify(result), result['code']
+
+
+@app.route('/recipes')
+def get_recipes():
+    result = bl.get_recipes()
+    return jsonify(result), result['code']
+
+
+@app.route('/recipes', methods=['POST'])
+def create_recipe():
+    if not request.is_json:
+        return jsonify({'code': 400, 'msg': 'No data provided'}), 400
+    data = request.json
+    result = bl.create_recipe(data)
+    return jsonify(result), result['code']
+
+
+@app.route('/recipes/<recipe_id>/run')
+def run_recipe(recipe_id):
+    result = bl.run_recipe(recipe_id)
+    return jsonify(result), result['code']
+
+
+@app.route('/recipes/<recipe_id>/enableDisable', methods=['PUT'])
+def enable_disable_recipe(recipe_id):
+    result = bl.enable_disable_recipe(recipe_id)
+    return jsonify(result), result['code']
+
+
+@app.route('/recipes/<recipe_id>', methods=['DELETE'])
+def delete_recipe(recipe_id):
+    result = bl.delete_recipe(recipe_id)
+    return jsonify(result), result['code']
+
+
+@app.route('/recipes/import', methods=['PUT'])
+def import_recipe():
+    if not request.is_json:
+        return jsonify({'code': 400, 'msg': 'No data provided'}), 400
+    data = request.json
+    result = bl.import_recipe(data)
     return jsonify(result), result['code']
 
 

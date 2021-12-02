@@ -1,0 +1,108 @@
+{
+    "things": [
+        {
+            "id": "RTX2080",
+            "name": "",
+            "desc": "",
+            "icon": "",
+            "space": "RTX2080Space",
+            "ip": "192.168.48.223"
+        }
+    ],
+    "services": [
+        {
+            "thing": "RTX2080",
+            "name": "BeepBuzzer",
+            "id": "BeepBuzzer",
+            "entity": "BUZZ",
+            "space": "RTX2080Space",
+            "icon": ""
+        },
+        {
+            "thing": "RTX2080",
+            "name": "TurnOnLED",
+            "id": "TurnOnLED",
+            "entity": "LED",
+            "space": "RTX2080Space",
+            "icon": ""
+        },
+        {
+            "thing": "RTX2080",
+            "name": "TurnOffLED",
+            "id": "TurnOffLED",
+            "entity": "LED",
+            "space": "RTX2080Space",
+            "icon": ""
+        },
+        {
+            "thing": "RTX2080",
+            "name": "SMSStatus",
+            "id": "SMSStatus",
+            "entity": "SMS",
+            "space": "RTX2080Space",
+            "icon": ""
+        },
+        {
+            "thing": "RTX2080",
+            "name": "BTNStatus",
+            "id": "BTNStatus",
+            "entity": "BTN",
+            "space": "RTX2080Space",
+            "icon": ""
+        }
+    ],
+    "relationships": [
+        {
+            "name": "relationship",
+            "id": "relationship",
+            "icon": "",
+            "desc": "Created relation",
+            "service1": "TurnOnLED",
+            "service2": "SMSStatus"
+        },
+        {
+            "name": "TestDummy",
+            "id": "TestDummy",
+            "icon": "",
+            "desc": "DummyDesc",
+            "service1": "TurnOffLED",
+            "service2": "TurnOnLED"
+        },
+        {
+            "name": "ImportedRel",
+            "id": "ImportedRel",
+            "icon": null,
+            "desc": "ImportedRel",
+            "service1": "TurnOnLED",
+            "service2": "TurnOffLED"
+        },
+        {
+            "name": "",
+            "id": "",
+            "icon": "",
+            "desc": "Created relation",
+            "service1": "BeepBuzzer",
+            "service2": "TurnOffLED"
+        }
+    ],
+    "recipes": [
+        {
+            "name": "Hello",
+            "id": "Hello",
+            "relationships": [
+                "TestDummy"
+            ],
+            "icon": "",
+            "enabled": true
+        },
+        {
+            "name": "Imported1",
+            "id": "Imported1",
+            "relationships": [
+                "ImportedRel"
+            ],
+            "icon": "",
+            "enabled": false
+        }
+    ]
+}

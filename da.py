@@ -68,7 +68,18 @@ def get_services_of_thing(thing_id):
     for service in data['services']:
         if service['thing'] == thing_id:
             service['thing'] = get_thing(thing_id)
+            service['column'] = 'Services'
             services.append(service)
+    return services
+
+
+def get_all_services():
+    services = []
+    data = get_data()
+    for service in data['services']:
+        service['thing'] = get_thing(service['thing'])
+        service['column'] = 'Services'
+        services.append(service)
     return services
 
 
@@ -125,9 +136,20 @@ def get_all_relationships():
     data = get_data()
     relationships = data['relationships']
     for relationship in relationships:
-        relationship['service_1'] = get_service(relationship['service_1'])
-        relationship['service_2'] = get_service(relationship['service_2'])
+        relationship['service1'] = get_service(relationship['service1'])
+        relationship['service2'] = get_service(relationship['service2'])
     return relationships
+
+
+def get_relationship(relationship_id):
+    data = get_data()
+    relationships = data['relationships']
+    for relationship in relationships:
+        if relationship['id'] == relationship_id:
+            relationship['service1'] = get_service(relationship['service1'])
+            relationship['service2'] = get_service(relationship['service2'])
+            return relationship
+    return None
 
 
 def create_relationship(**kwargs):
@@ -145,11 +167,11 @@ def create_relationship(**kwargs):
             "id": name,
             "icon": icon,
             "desc": desc,
-            'service_1': service_1,
-            'service_2': service_2
+            'service1': service_1,
+            'service2': service_2
         }
         updated_relationships = []
-        for relationship in data['services']:
+        for relationship in data['relationships']:
             if relationship['name'] == name:
                 updated_relationships.append(generated_relationship)
                 new = False
@@ -167,3 +189,95 @@ def create_relationship(**kwargs):
         return True
     except:
         return False
+
+
+def get_recipe(recipe_id):
+    data = get_data()
+    recipes = data['recipes']
+    for recipe in recipes:
+        if recipe['id'] == recipe_id:
+            relationships = []
+            for relationship_id in recipe['relationships']:
+                relationships.append(get_relationship(relationship_id))
+            recipe['relationships'] = relationships
+            return recipe
+    return None
+
+
+def get_recipes():
+    recipes = []
+    data = get_data()
+    for recipe in data['recipes']:
+        recipe['relationships'] = [get_relationship(
+            recipe_id) for recipe_id in recipe['relationships']]
+        recipes.append(recipe)
+    return recipes
+
+
+def create_recipe(**kwargs):
+    id = kwargs.get('id')
+    name = kwargs.get('name')
+    relationships = kwargs.get('relationships')
+    icon = kwargs.get('icon')
+    enabled = False
+
+    if 'enabled' in kwargs:
+        enabled = kwargs['enabled']
+
+    try:
+        new = True
+        data = get_data()
+        generated_recipe = {
+            "name": name,
+            "id": name,
+            "relationships": relationships,
+            "icon": icon,
+            "enabled": enabled
+        }
+        updated_recipes = []
+        for recipe in data['recipes']:
+            if recipe['id'] == id:
+                updated_recipes.append(generated_recipe)
+                new = False
+            else:
+                updated_recipes.append(recipe)
+
+        if new:
+            updated_recipes.append(generated_recipe)
+
+        data['recipes'] = updated_recipes
+
+        f = open('config.json', 'w')
+        json.dump(data, f)
+        f.close()
+        return True
+    except Exception as e:
+        print(e)
+        return False
+
+
+def enable_disable_recipe(recipe_id):
+    recipe = get_recipe(recipe_id)
+    if recipe is not None:
+        if 'enabled' not in recipe:
+            recipe['enabled'] = False
+        enabled = not recipe['enabled']
+        relationship_ids = [r['id'] for r in recipe['relationships']]
+        return create_recipe(id=recipe['id'], name=recipe['name'], relationships=relationship_ids, icon=recipe['icon'], enabled=enabled)
+    else:
+        return False
+
+
+def delete_recipe(recipe_id):
+    data = get_data()
+    updated_recipes = []
+    for recipe in data['recipes']:
+        if recipe['id'] != recipe_id:
+            updated_recipes.append(recipe)
+
+    data['recipes'] = updated_recipes
+
+    f = open('config.json', 'w')
+    json.dump(data, f)
+    f.close()
+    return True

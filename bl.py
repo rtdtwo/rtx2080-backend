@@ -9,6 +9,13 @@ def get_things():
     }
 
 
+def get_all_services():
+    return {
+        'code': 200,
+        'result': da.get_all_services()
+    }
+
+
 def get_services(thing_id):
     return {
         'code': 200,
@@ -24,7 +31,7 @@ def get_relationships():
 
 
 def create_relationship(data):
-    if 'name' not in data or 'desc' not in data or 'service_1' not in data or 'service_2' not in data:
+    if 'name' not in data or 'desc' not in data or 'service1' not in data or 'service2' not in data:
         return {
             'code': 400,
             'msg': 'Name, Description, or Services not provided'
@@ -32,8 +39,8 @@ def create_relationship(data):
 
     name = data['name']
     desc = data['desc']
-    service_1 = data['service_1']
-    service_2 = data['service_2']
+    service_1 = data['service1']
+    service_2 = data['service2']
     if 'icon' in data:
         icon = data['icon']
     else:
@@ -115,38 +122,121 @@ def create_service(data):
         }
 
 
-def run_app(app_id):
-    app = da.get_app()
-    app_results = []
-    for recipe in [da.get_recipe(recipe_id) for recipe_id in app['recipes']]:
-        recipe_results = {
-            'id': recipe['id'],
+def create_recipe(data):
+    if 'name' not in data or 'relationships' not in data or 'relationships' not in data:
+        return {
+            'code': 400,
+            'msg': 'Name or relationships not provided'
+        }
+
+    name = data['name']
+    id = name
+    relationships = data['relationships']
+
+    if 'icon' in data:
+        icon = data['icon']
+    else:
+        icon = ''
+
+    result = da.create_recipe(
+        id=id, name=name, icon=icon, relationships=relationships)
+    if result:
+        return {
+            'code': 201,
+            'msg': 'Recipe {} created'.format(name)
+        }
+    else:
+        return {
+            'code': 500,
+            'msg': 'Server error. It is not you, it is us.'
+        }
+
+
+def get_recipes():
+    return{
+        'code': 200,
+        'result': da.get_recipes()
+    }
+
+
+def run_recipe(recipe_id):
+    recipe = da.get_recipe(recipe_id)
+
+    recipe_results = {
+        'recipe': recipe,
+        'result': []
+    }
+
+    for relationship in recipe['relationships']:
+        relationship_results = {
+            'relationship': relationship,
             'result': []
         }
-        for relationship in [da.get_relationship(relationship_id) for relationship_id in recipe['relationships']]:
-            relationship_results = {
-                'relationship': relationship,
-                'result': []
-            }
-            service_1 = da.get_service(relationship['service_1'])
-            result_1 = execute_service(service_1)
-            service_2 = da.get_service(relationship['service_2'])
-            result_2 = execute_service(service_2)
-            relationship_results['result'].append({
-                'service': service_1,
-                'result': result_1
-            })
-            relationship_results['result'].append({
-                'service': service_2,
-                'result': result_2
-            })
+        result_1 = execute_service(relationship['service1'], None)
+        result_2 = execute_service(relationship['service2'], result_1)
+        relationship_results['result'].append({
+            'service': relationship['service1'],
+            'result': result_1
+        })
+        relationship_results['result'].append({
+            'service': relationship['service2'],
+            'result': result_2
+        })
 
-            recipe_results['result'].append(relationship_results)
-
-        app_results.append(recipe_results)
+        recipe_results['result'].append(relationship_results)
 
     return {
         'code': 200,
         'msg': 'Actions performed',
-        'result': app_results
+        'result': recipe_results
     }
+
+
+def enable_disable_recipe(recipe_id):
+    result = da.enable_disable_recipe(recipe_id)
+    if result:
+        return {
+            'code': 200,
+            'msg': 'Recipe enabled/disabled',
+        }
+    else:
+        return {
+            'code': 500,
+            'msg': 'Server error. It is not you, it is us.'
+        }
+
+
+def delete_recipe(recipe_id):
+    result = da.delete_recipe(recipe_id)
+    if result:
+        return {
+            'code': 200,
+            'msg': 'Recipe deleted'
+        }
+    else:
+        return {
+            'code': 500,
+            'msg': 'Server error. It is not you, it is us.'
+        }
+
+
+def import_recipe(data):
+    try:
+        relationships = data['relationships']
+        for relationship in relationships:
+            service_1 = relationship['service1']
+            service_2 = relationship['service2']
+            da.create_relationship(name=relationship['name'], desc=relationship['desc'], service_1=service_1['name'], service_2=service_2['name'])
+            da.create_service(thing=service_1['thing']['id'], name=service_1['name'], entity=service_1['entity'], space=service_1['space'], icon=service_1['icon'])
+            da.create_service(thing=service_2['thing']['id'], name=service_2['name'], entity=service_2['entity'], space=service_2['space'], icon=service_2['icon'])
+        
+        da.create_recipe(id=data['id'], name=data['name'], relationships=[relationship['name'] for relationship in relationships], icon=data['icon'], enabled=False)
+        return {
+            'code': 200,
+            'msg': 'Recipe imported'
+        }
+    except:
+        return {
+            'code': 500,
+            'msg': 'Error importing'
+        }
